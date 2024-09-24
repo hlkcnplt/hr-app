@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { toast } from "@/hooks/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -17,6 +17,9 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 
+// const MAX_FILE_SIZE = 500000; 
+// const ACCEPTED_IMAGE_TYPES = [ "image/jpeg", "image/jpg", "image/png", "image/webp", ];
+
 const FormSchema = z.object({
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
@@ -24,35 +27,39 @@ const FormSchema = z.object({
   surname: z.string().min(2, {
     message: "Surname must be at least 2 characters.",
   }),
-  resume: z.string().min(2, {
-    message: "",
-  }),
-  terms: z.string().min(2, {
-    message: "",
-  })
+  image: z
+    .any(),
+    // .refine((files) => files?.length == 1, "Image is required.")
+    // .refine(
+    //   (files) => files?.[0]?.size <= MAX_FILE_SIZE,
+    //   `Max file size is 5MB.`
+    // )
+    // .refine(
+    //   (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
+    //   ".jpg, .jpeg, .png and .webp files are accepted."
+    // ),
+
+
+  terms: z.any()
 })
 
 
 export default function Home() {
+  const { toast } = useToast()
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       name: "",
       surname: "",
-      resume: "",
-      terms: "",
+      image: null,
+      terms: null,
     },
   })
 
- 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
+  function onSubmit() {
     toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
+      description: "You submitted your resume. HR will contact you in following days."
     })
   }
 
@@ -96,7 +103,7 @@ export default function Home() {
             </div>
             <FormField
               control={form.control}
-              name="resume"
+              name="image"
               render={({}) => (
                 <FormItem>
                   <FormLabel>Resume</FormLabel>
@@ -125,11 +132,11 @@ export default function Home() {
                 </FormItem>
               )}
             />
-            <div className="flex flex-row items-end justify-end"><Button type="submit">Submit</Button></div>
+            <div className="flex flex-row items-end justify-end">
+              <Button type="submit">Submit</Button>
+              </div>
           </form>
         </Form>
-
-        
       </div>
     </div>
   );
